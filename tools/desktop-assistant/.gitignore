@@ -1,0 +1,13 @@
+.runtime/
+node_modules/
+data/
+dist/
+dist-electron/
+build-output/
+release/
+screenshots/
+*.lnk
+*.log
+.env
+.env.*
+!.env.example

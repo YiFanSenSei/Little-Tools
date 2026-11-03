@@ -2,6 +2,11 @@
 data/
 release/
 node_modules/
+.runtime/
+dist/
+dist-electron/
+build-output/
+*.lnk
 .env
 .env.*
 !.env.example

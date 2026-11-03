@@ -6,5 +6,14 @@
     "runtime": "node",
     "defaultPort": 3210,
     "commands": ["start", "scan", "doctor", "test", "privacy:check", "release"]
+  },
+  {
+    "id": "desktop-assistant",
+    "name": "桌面助手 · 截图收纳与互动桌宠",
+    "path": "tools/desktop-assistant",
+    "runtime": "electron",
+    "defaultPort": 3220,
+    "binaryAssets": "binary-assets.json",
+    "commands": ["setup", "start", "dev", "build", "pack", "test", "check:interaction", "privacy:check"]
   }
 ]

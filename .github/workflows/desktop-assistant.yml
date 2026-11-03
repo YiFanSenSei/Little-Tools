@@ -1,0 +1,26 @@
+name: Desktop Assistant assembly, tests and build
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  desktop-assistant:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22.21.0', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm run privacy:check
+      - run: npm run setup
+        working-directory: tools/desktop-assistant
+      - run: npm test
+        working-directory: tools/desktop-assistant
+      - run: npm run build
+        working-directory: tools/desktop-assistant
+      - run: npm run privacy:check

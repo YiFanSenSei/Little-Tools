@@ -1,0 +1,59 @@
+{
+  "name": "little-tools-desktop-capture",
+  "version": "0.6.1",
+  "private": true,
+  "description": "桌面助手 - Desktop Assistant",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "start": "electron .",
+    "test": "node --test test/capture-store.test.mjs test/capture-collector.test.mjs test/pet-geometry.test.mjs test/pet-skin.test.mjs test/clipboard-revision.test.mjs test/pet-life.test.mjs test/pet-presets.test.mjs",
+    "pack": "npm run build && electron-builder --win --dir",
+    "dist": "npm run build && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.littletools.desktopcapture.local",
+    "productName": "桌面助手",
+    "directories": {
+      "output": "build-output/pet-0.6.1"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json",
+      "THIRD-PARTY-NOTICES.md",
+      "licenses/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "桌面助手"
+    }
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.3",
+    "vite-plugin-electron": "^0.28.8"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true,
+    "esbuild@0.25.12": true
+  }
+}

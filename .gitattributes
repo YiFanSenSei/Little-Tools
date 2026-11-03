@@ -6,3 +6,7 @@
 *.yml text eol=lf
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
+*.patch text eol=lf
+*.png binary
+*.gif binary
+*.webm binary

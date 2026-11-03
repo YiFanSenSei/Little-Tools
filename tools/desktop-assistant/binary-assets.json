@@ -1,0 +1,122 @@
+[
+  {
+    "path": "overlay/src/assets/pets/crab/idle.gif",
+    "sha256": "45166d4bd475b3b7d3c722e7e74b61477a6b4a7615d57e858bfa18023ff01526",
+    "bytes": 4165
+  },
+  {
+    "path": "overlay/src/assets/pets/crab/idle.png",
+    "sha256": "58a42b378a44ffd9b863677c8a82363af040210aef44104551f9490cf7b8db20",
+    "bytes": 1336
+  },
+  {
+    "path": "overlay/src/assets/pets/crab/swipe.gif",
+    "sha256": "dadce31a17a52d9591d176dcfa2348dd349ad6b98b278b7d21efcbc3c98bee72",
+    "bytes": 6785
+  },
+  {
+    "path": "overlay/src/assets/pets/crab/with_ball.gif",
+    "sha256": "da56ad98b5bbce381469c4f363277846383b9e81ff292f2a7f64c35183c7140c",
+    "bytes": 2686
+  },
+  {
+    "path": "overlay/src/assets/pets/fox/idle.gif",
+    "sha256": "7a352ee273b8a05ea616db42a661001e6217f93370d66133addd682ac6056684",
+    "bytes": 3008
+  },
+  {
+    "path": "overlay/src/assets/pets/fox/idle.png",
+    "sha256": "b76c715a33eeff2af1ca90b659d1064ecf6f3b56d2b5dfd3bcea3ea28b47610b",
+    "bytes": 828
+  },
+  {
+    "path": "overlay/src/assets/pets/fox/lie.gif",
+    "sha256": "e11e25c5d87138600c952cd669f67e3491a8a15d0e46bfdf8fb45f07a6634b8a",
+    "bytes": 2502
+  },
+  {
+    "path": "overlay/src/assets/pets/fox/swipe.gif",
+    "sha256": "9e424f76156d744c9d4fb01f3ef193fae9dc704ec7c5b0ff451dbaf877033cb1",
+    "bytes": 5825
+  },
+  {
+    "path": "overlay/src/assets/pets/fox/with_ball.gif",
+    "sha256": "369b9326fc88ee045315c835013c82bc53e7b55bdd4628c25a646869c2b93a7a",
+    "bytes": 3143
+  },
+  {
+    "path": "overlay/src/assets/pets/rubber-duck/idle.gif",
+    "sha256": "de9950e2d6910acc4ceb789efe615765e39b9ec1e6c3352fdf719a987d6a00be",
+    "bytes": 3494
+  },
+  {
+    "path": "overlay/src/assets/pets/rubber-duck/idle.png",
+    "sha256": "1ffdd2eae33e97e8ac611c00d8b7db0b265eb0f5a7b20e8825a885419e6a63cc",
+    "bytes": 655
+  },
+  {
+    "path": "overlay/src/assets/pets/rubber-duck/swipe.gif",
+    "sha256": "a895d6e9acd6d66bf7abfab82aa1e11140ddb42ff6bbadaa1fd4a5f414ef9c19",
+    "bytes": 1912
+  },
+  {
+    "path": "overlay/src/assets/pets/rubber-duck/with_ball.gif",
+    "sha256": "e1d81e4ccaf2ef52260cbf5634d882106452a6fa9e867c85a75a26de879fec56",
+    "bytes": 3638
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/drag.webm",
+    "sha256": "31373a86026636eecc890db763760309360310eb095cf5575b13c9ca2a6cc80e",
+    "bytes": 464764
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/feed.webm",
+    "sha256": "e48a70e61d93195c611c2d4041be32a26a114f78c835ff6b2345459ae39a90ce",
+    "bytes": 495122
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/happy.webm",
+    "sha256": "86dcb0c3dd7b651de9c107e927d57a5c4224599101706dbdcc782fa48bcd0ad7",
+    "bytes": 538110
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/idle.webm",
+    "sha256": "deb965d05a85dacf5ff4a20faa757846f0d11679598c3ec578a5571487660395",
+    "bytes": 441437
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/pat.webm",
+    "sha256": "f228279219f4084323ca1bfef1604f7c77bb3f505d45a8d1747b5ac3f9f2393b",
+    "bytes": 425393
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/play.webm",
+    "sha256": "4f737e44ea67c20368bdce474b951902c87c37991fb0750da8ed7794df6ec55c",
+    "bytes": 576307
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/poster.png",
+    "sha256": "d8459e1b38be39ff1dcf5b676125d6c0aae78d41efa595b681c19c3f6e1a5af7",
+    "bytes": 112556
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/sleep.webm",
+    "sha256": "31d4a6b36a29b2a4fe097384173d3bbeb3fa2f40f526b13191791456bf7507a1",
+    "bytes": 433769
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/stretch.webm",
+    "sha256": "0ac66d918cc5efd49be1273c3830de73eae5f9bdcd5fcb968d1b2f9b487705ad",
+    "bytes": 396987
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/wake.webm",
+    "sha256": "7e10c87cfcbd63b20b5a3787be71b0500381d54ea04a5ac0e9d99f59ed49a6d7",
+    "bytes": 454028
+  },
+  {
+    "path": "overlay/src/assets/pets/shenshen/wave.webm",
+    "sha256": "48cd729ccdcf746369942ea954d242e9afdd5643e1dac3827fa5e67450eb8776",
+    "bytes": 421669
+  }
+]

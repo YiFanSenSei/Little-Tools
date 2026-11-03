@@ -1,0 +1,264 @@
+diff --git a/electron/main.ts b/electron/main.ts
+index af20d75..c587867 100644
+--- a/electron/main.ts
++++ b/electron/main.ts
+@@ -1,2 +1,3 @@
+-import { app, BrowserWindow, ipcMain, clipboard, dialog, screen, nativeImage, Tray, Menu, globalShortcut } from 'electron'
+-import { join } from 'path'
++import { app, BrowserWindow, ipcMain, clipboard, dialog, screen, nativeImage, Tray, Menu, globalShortcut, shell } from 'electron'
++import { join, resolve } from 'path'
++import { mkdirSync } from 'fs'
+@@ -4,0 +6,12 @@ import { readdir, stat, writeFile, readFile } from 'fs/promises'
++import { startCaptures, stopCaptures, textHistoryEnabled, setSnippingHandler, onCaptureEvent } from './captures'
++import { startPet, stopPet, restorePet, hidePetFor, openLibrary, petMenu } from './pet'
++let mainTarget:{id?:string;filter?:'all'|'favorites';nonce:number}={filter:'all',nonce:0}
++
++// Separate data and single-instance identity from the unmodified upstream app.
++app.setName('little-tools-desktop-capture')
++const captureDataDir=resolve(process.env.CAPTURE_DATA_DIR || join(app.getPath('appData'), 'LittleTools', 'DesktopCapture'))
++mkdirSync(captureDataDir,{recursive:true})
++app.setPath('userData', captureDataDir)
++const singleInstance = app.requestSingleInstanceLock()
++if (!singleInstance) app.quit()
++app.on('second-instance', () => showMainWindow())
+@@ -32 +44,0 @@ const MAX_TEXT_ENTRIES = 100
+-const MAX_IMAGE_ENTRIES = 20
+@@ -74,18 +86,2 @@ function createWindow() {
+-    dialog.showMessageBox(mainWindow!, {
+-      type: 'question',
+-      buttons: ['关闭应用', '后台运行'],
+-      defaultId: 0,
+-      cancelId: 1,
+-      title: '关闭桌面助手',
+-      message: '要关闭应用，还是让它在后台继续运行？',
+-      detail: '选择「后台运行」后窗口会隐藏，剪贴板监听等功能继续工作，可从系统托盘图标重新打开。',
+-    }).then(({ response }) => {
+-      if (response === 0) {
+-        isQuitting = true
+-        app.quit()
+-      } else {
+-        mainWindow?.hide()
+-      }
+-    }).catch(() => {
+-      mainWindow?.hide()
+-    })
++    mainWindow?.hide()
++    restorePet()
+@@ -128,0 +125 @@ function showMainWindow() {
++  if (mainWindow.isMinimized()) mainWindow.restore()
+@@ -137 +134,3 @@ function createTray() {
+-    { label: '显示主窗口', click: () => showMainWindow() },
++    { label: '找回桌面助手', click: () => restorePet() },
++    { label: '打开桌面助手', click: () => {void openLibrary()} },
++    { label: '宠物菜单', click: () => petMenu() },
+@@ -142,2 +141,2 @@ function createTray() {
+-  tray.on('click', () => showMainWindow())
+-  tray.on('double-click', () => showMainWindow())
++  tray.on('click', () => restorePet())
++  tray.on('double-click', () => {void openLibrary()})
+@@ -264 +263 @@ function persistClipboardHistory() {
+-  writeFile(clipboardHistoryPath, JSON.stringify(clipboardHistory), 'utf8').catch(() => {
++  writeFile(clipboardHistoryPath, JSON.stringify(clipboardHistory.filter(e=>e.type==='text')), 'utf8').catch(() => {
+@@ -284,4 +283 @@ function addClipboardEntry(entry: ClipboardEntry) {
+-  if (entry.type === 'image') {
+-    let n = 0
+-    clipboardHistory = clipboardHistory.filter(e => e.type !== 'image' || ++n <= MAX_IMAGE_ENTRIES)
+-  } else {
++  {
+@@ -295,11 +291,4 @@ function pollClipboard() {
+-  // 图片优先：剪贴板含图片时按图片记录
+-  const image = clipboard.readImage()
+-  if (!image.isEmpty()) {
+-    const dataUrl = image.toDataURL()
+-    if (clipboardLastSeen === dataUrl) return
+-    clipboardLastSeen = dataUrl
+-    if (!clipboardHistory.some(e => e.type === 'image' && e.content === dataUrl)) {
+-      addClipboardEntry({ id: Date.now().toString(), type: 'image', content: dataUrl, timestamp: Date.now() })
+-    }
+-    return
+-  }
++  // Images now live in the dedicated file-backed capture library.
++  if (!textHistoryEnabled()) return
++  // Inspect format names, not the full bitmap, even when text history is enabled.
++  if (clipboard.availableFormats().some(format=>/^(image\/|PNG$|CF_DIB|CF_BITMAP|Bitmap$|DeviceIndependentBitmap$)/i.test(format))) return
+@@ -319,2 +308,2 @@ function startClipboardMonitor() {
+-  pollClipboard()
+-  clipboardInterval = setInterval(pollClipboard, 1500)
++  try { pollClipboard() } catch { /* clipboard is temporarily busy */ }
++  clipboardInterval = setInterval(() => { try { pollClipboard() } catch { /* retry next interval */ } }, 1500)
+@@ -323,0 +313,2 @@ app.whenReady().then(async () => {
++  if (!singleInstance) return
++  await startCaptures()
+@@ -328 +319,17 @@ app.whenReady().then(async () => {
+-  createWindow()
++  let snipTimer:ReturnType<typeof setTimeout>|null=null
++  let cancelSnip:()=>void=()=>{}
++  const snip=async()=>{
++    if(process.platform!=='win32')throw new Error('请使用当前系统的截图快捷键。')
++    if(mainWindow?.isVisible())mainWindow.hide()
++    if(popupWindow?.isVisible())popupWindow.hide()
++    hidePetFor(30_000)
++    cancelSnip();if(snipTimer)clearTimeout(snipTimer)
++    const restore=()=>{restorePet();cancelSnip();if(snipTimer)clearTimeout(snipTimer)}
++    cancelSnip=onCaptureEvent(event=>{if(event.kind==='captured')restore()})
++    snipTimer=setTimeout(restore,30_000)
++    await new Promise(resolve=>setTimeout(resolve,180))
++    try{await shell.openExternal('ms-screenclip:')}catch(e){restore();throw e}
++    return true
++  }
++  setSnippingHandler(snip)
++  await startPet({snip,quit:()=>{isQuitting=true;app.quit()},openMain:target=>{mainTarget=target;showMainWindow();mainWindow?.webContents.send('main-navigate',mainTarget)}})
+@@ -330 +337 @@ app.whenReady().then(async () => {
+-})
++}).catch(error => { dialog.showErrorBox('桌面助手启动失败', error instanceof Error?error.message:'无法打开本机数据目录'); app.quit() })
+@@ -342,0 +350,2 @@ app.on('before-quit', () => {
++  stopCaptures()
++  stopPet()
+@@ -348,3 +357 @@ app.on('activate', () => {
+-  if (BrowserWindow.getAllWindows().length === 0) {
+-    createWindow()
+-  }
++  restorePet()
+@@ -363,0 +371 @@ ipcMain.handle('window-is-maximized', () => mainWindow?.isMaximized() ?? false)
++ipcMain.handle('main-target-get',()=>mainTarget)
+diff --git a/electron/preload.ts b/electron/preload.ts
+index b5bbe68..9ba21e7 100644
+--- a/electron/preload.ts
++++ b/electron/preload.ts
+@@ -8,0 +9,34 @@ contextBridge.exposeInMainWorld('electronAPI', {
++  petGet:()=>ipcRenderer.invoke('pet-get'),
++  petPresetSelect:(id:string)=>ipcRenderer.invoke('pet-preset-select',id),
++  petSkinGet:()=>ipcRenderer.invoke('pet-skin-get'),
++  petSkinChoose:()=>ipcRenderer.invoke('pet-skin-choose'),
++  petSkinReset:()=>ipcRenderer.invoke('pet-skin-reset'),
++  petConfigure:(patch:unknown)=>ipcRenderer.invoke('pet-configure',patch),
++  petInteract:(action:string)=>ipcRenderer.invoke('pet-interact',action),
++  petToggle:()=>ipcRenderer.invoke('pet-toggle'),
++  petMenu:()=>ipcRenderer.send('pet-menu'),
++  petRestore:()=>ipcRenderer.send('pet-restore'),
++  petHide:(ms?:number)=>ipcRenderer.invoke('pet-hide',ms),
++  petOpenMain:(id?:string,filter?:string)=>ipcRenderer.invoke('pet-open-main',id,filter),
++  petMarkSeen:()=>ipcRenderer.invoke('pet-seen'),
++  petPanelMode:(mode:string)=>ipcRenderer.invoke('pet-panel-mode',mode),
++  petPanelClose:()=>ipcRenderer.send('pet-panel-close'),
++  petQuit:()=>ipcRenderer.send('pet-quit'),
++  petIgnore:(ignore:boolean)=>ipcRenderer.send('pet-ignore',ignore),
++  petDragStart:()=>ipcRenderer.send('pet-drag-start'),
++  petDragEnd:(cancelled?:boolean)=>ipcRenderer.invoke('pet-drag-end',cancelled),
++  mainTargetGet:()=>ipcRenderer.invoke('main-target-get'),
++  onMainNavigate:(listener:(target:unknown)=>void)=>{const handler=(_event:unknown,target:unknown)=>listener(target);ipcRenderer.on('main-navigate',handler);return ()=>ipcRenderer.removeListener('main-navigate',handler)},
++  onPetState:(listener:(state:unknown)=>void)=>{const handler=(_event:unknown,state:unknown)=>listener(state);ipcRenderer.on('pet-state',handler);return ()=>ipcRenderer.removeListener('pet-state',handler)},
++  capturesGet: () => ipcRenderer.invoke('captures-get'),
++  capturesImport: () => ipcRenderer.invoke('captures-import'),
++  capturesConfigure: (patch: unknown) => ipcRenderer.invoke('captures-configure',patch),
++  capturesUpdate: (ids:string[],patch:unknown) => ipcRenderer.invoke('captures-update',ids,patch),
++  capturesImage: (id:string) => ipcRenderer.invoke('captures-image',id),
++  capturesCopy: (id:string) => ipcRenderer.invoke('captures-copy',id),
++  capturesExport: (ids:string[]) => ipcRenderer.invoke('captures-export',ids),
++  capturesFolder: () => ipcRenderer.invoke('captures-folder'),
++  capturesEmptyTrash: () => ipcRenderer.invoke('captures-empty-trash'),
++  capturesSnipping: () => ipcRenderer.invoke('captures-snipping'),
++  capturesTopmost: (enabled:boolean) => ipcRenderer.invoke('captures-topmost',enabled),
++  onCapturesChanged: (listener:()=>void) => { const handler=()=>listener();ipcRenderer.on('captures-changed',handler);return ()=>ipcRenderer.removeListener('captures-changed',handler) },
+diff --git a/src/App.tsx b/src/App.tsx
+index b96c802..19705fc 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -6,0 +7 @@ import { Settings } from './components/Settings'
++import { Captures } from './components/Captures'
+@@ -8 +9 @@ import { useSchedule } from './hooks/useSchedule'
+-import type { ViewType } from './types'
++import type { ViewType, MainTarget } from './types'
+@@ -14 +15,3 @@ export function App() {
+-  const [currentView, setCurrentView] = useState<ViewType>('dashboard')
++  const [currentView, setCurrentView] = useState<ViewType>('captures')
++  const [captureTarget,setCaptureTarget]=useState<MainTarget>({nonce:0})
++  useEffect(()=>{const navigate=(target:MainTarget)=>{setCaptureTarget(target);setCurrentView('captures')};const off=window.electronAPI.onMainNavigate(navigate);void window.electronAPI.mainTargetGet().then(navigate);return off},[])
+@@ -28,0 +32 @@ export function App() {
++      case 'captures': return <Captures target={captureTarget}/>
+diff --git a/src/components/Sidebar.tsx b/src/components/Sidebar.tsx
+index 6e1087a..157477c 100644
+--- a/src/components/Sidebar.tsx
++++ b/src/components/Sidebar.tsx
+@@ -12,0 +13 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
++        <button className={`nav-item ${currentView === 'captures' ? 'active' : ''}`} onClick={() => onViewChange('captures')}><span className="nav-icon">▧</span><span>截图收纳</span></button>
+diff --git a/src/components/SystemTools.tsx b/src/components/SystemTools.tsx
+index 8c6ae7e..7bc68bf 100644
+--- a/src/components/SystemTools.tsx
++++ b/src/components/SystemTools.tsx
+@@ -213 +213 @@ function ClipboardManager() {
+-        <span className="monitoring-badge">● 后台持续监听中</span>
++        <span className="monitoring-badge">图片请到「截图收纳」查看；文字自动记录默认关闭</span>
+diff --git a/src/main.tsx b/src/main.tsx
+index 27f0c46..50e63fd 100644
+--- a/src/main.tsx
++++ b/src/main.tsx
+@@ -6,0 +7,2 @@ const isPopup = params.get('view') === 'popup'
++const petView = params.get('view')
++if (petView?.startsWith('pet')) document.documentElement.dataset.surface=petView
+@@ -9 +11,4 @@ async function render() {
+-  if (isPopup) {
++  if (petView?.startsWith('pet')) {
++    const { Pet, PetPanel, PetBubble } = await import('./components/Pet')
++    ReactDOM.createRoot(document.getElementById('root')!).render(petView==='pet-panel'?<PetPanel/>:petView==='pet-bubble'?<PetBubble/>:<Pet/>)
++  } else if (isPopup) {
+diff --git a/src/types/index.ts b/src/types/index.ts
+index d4093b3..95355ab 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -25 +25,6 @@ export interface ClipboardEntry {
+-export type ViewType = 'dashboard' | 'schedule' | 'tools' | 'settings'
++export interface CaptureRecord { id:string;timestamp:number;title:string;thumbnail:string;width:number;height:number;bytes:number;favorite:boolean;deletedAt:number|null }
++export interface CaptureState { records:CaptureRecord[];settings:{enabled:boolean;textEnabled:boolean};bytes:number;maxBytes:number;warning:string|null;message:string }
++export interface MainTarget {id?:string;filter?:'all'|'favorites';nonce:number}
++export interface PetLife {affection:number;energy:number;sleeping:boolean;serial:number;action:string;message:string}
++export interface PetState {version:string;size:number;motion:boolean;sound:boolean;clickSound:boolean;autoLaunch:boolean;unread:number;enabled:boolean;problem:string;phase:'idle'|'happy';serial:number;mirrored:boolean;panelMode:'recent'|'settings';bubble:string;hidden:boolean;skinKey:string;autonomy:boolean;life:PetLife}
++export type ViewType = 'captures' | 'dashboard' | 'schedule' | 'tools' | 'settings'
+diff --git a/src/vite-env.d.ts b/src/vite-env.d.ts
+index a246269..597c0cb 100644
+--- a/src/vite-env.d.ts
++++ b/src/vite-env.d.ts
+@@ -3 +3 @@
+-import type { ClipboardEntry } from './types'
++import type { ClipboardEntry, CaptureState, PetState, MainTarget } from './types'
+@@ -5,0 +6,34 @@ interface ElectronAPI {
++  petGet:()=>Promise<PetState>
++  petPresetSelect:(id:string)=>Promise<PetState>
++  petSkinGet:()=>Promise<string|null>
++  petSkinChoose:()=>Promise<boolean>
++  petSkinReset:()=>Promise<PetState>
++  petConfigure:(patch:{size?:number;motion?:boolean;autonomy?:boolean;sound?:boolean;clickSound?:boolean;autoLaunch?:boolean})=>Promise<PetState>
++  petInteract:(action:'pat'|'feed'|'play'|'sleep'|'wake'|'land')=>Promise<PetState>
++  petToggle:()=>Promise<void>
++  petMenu:()=>void
++  petRestore:()=>void
++  petHide:(ms?:number)=>Promise<void>
++  petOpenMain:(id?:string,filter?:string)=>Promise<void>
++  petMarkSeen:()=>Promise<void>
++  petPanelMode:(mode:'recent'|'settings')=>Promise<void>
++  petPanelClose:()=>void
++  petQuit:()=>void
++  petIgnore:(ignore:boolean)=>void
++  petDragStart:()=>void
++  petDragEnd:(cancelled?:boolean)=>Promise<{moved:boolean}>
++  onPetState:(listener:(state:PetState)=>void)=>()=>void
++  mainTargetGet:()=>Promise<MainTarget>
++  onMainNavigate:(listener:(target:MainTarget)=>void)=>()=>void
++  capturesGet:()=>Promise<CaptureState>
++  capturesImport:()=>Promise<CaptureState>
++  capturesConfigure:(patch:{enabled?:boolean;textEnabled?:boolean})=>Promise<CaptureState>
++  capturesUpdate:(ids:string[],patch:{title?:string;favorite?:boolean;deletedAt?:number|null})=>Promise<CaptureState>
++  capturesImage:(id:string)=>Promise<string>
++  capturesCopy:(id:string)=>Promise<boolean>
++  capturesExport:(ids:string[])=>Promise<{count:number;destination:string}|null>
++  capturesFolder:()=>Promise<string>
++  capturesEmptyTrash:()=>Promise<CaptureState>
++  capturesSnipping:()=>Promise<boolean>
++  capturesTopmost:(enabled:boolean)=>Promise<boolean>
++  onCapturesChanged:(listener:()=>void)=>()=>void
+diff --git a/vite.config.ts b/vite.config.ts
+index 3a0b566..1a1cdab 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -6,0 +7 @@ export default defineConfig({
++  server: {host:'127.0.0.1',port:3220,strictPort:true},

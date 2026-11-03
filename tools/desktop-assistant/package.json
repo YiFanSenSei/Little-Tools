@@ -1,0 +1,19 @@
+{
+  "name": "little-tools-desktop-assistant-recipe",
+  "version": "0.6.1",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Desktop Assistant source overlay and reproducible local assembly",
+  "engines": {"node": ">=22.21.0"},
+  "scripts": {
+    "setup": "node scripts/run.mjs setup",
+    "start": "node scripts/run.mjs start",
+    "dev": "node scripts/run.mjs dev",
+    "build": "node scripts/run.mjs build",
+    "pack": "node scripts/run.mjs pack",
+    "test": "node scripts/run.mjs test",
+    "check:interaction": "node scripts/run.mjs interaction",
+    "privacy:check": "node scripts/privacy-check.mjs"
+  }
+}
