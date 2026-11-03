@@ -78,6 +78,8 @@
   "scripts/run.mjs",
   "scripts/setup.mjs",
   "scripts/start.ps1",
+  "scripts/validate-dependencies.mjs",
+  "test/setup.test.mjs",
   "upstream.json",
   "启动.cmd"
 ]

@@ -12,7 +12,7 @@
     "dev": "node scripts/run.mjs dev",
     "build": "node scripts/run.mjs build",
     "pack": "node scripts/run.mjs pack",
-    "test": "node scripts/run.mjs test",
+    "test": "node --test test/setup.test.mjs && node scripts/run.mjs test",
     "check:interaction": "node scripts/run.mjs interaction",
     "privacy:check": "node scripts/privacy-check.mjs"
   }

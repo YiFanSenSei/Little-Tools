@@ -4,6 +4,7 @@ import {existsSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
+import {verifyInstalledVersions} from './validate-dependencies.mjs';
 export const root=fileURLToPath(new URL('../',import.meta.url));
 export const appDir=path.join(root,'.runtime','app');
 const runtime=path.join(root,'.runtime'),base=path.join(runtime,'upstream');
@@ -72,8 +73,9 @@ export async function prepare({install=true}={}){
   const lockHash=sha(await readFile(path.join(appDir,'package-lock.json'))),dependencyStamp=path.join(runtime,'dependencies.txt');
   let installed='';try{installed=await readFile(dependencyStamp,'utf8');}catch{}
   if(install&&(installed!==lockHash||!existsSync(path.join(appDir,'node_modules/electron/package.json')))){
-    await npm(['ci','--no-audit','--no-fund'],{env});await writeFile(dependencyStamp,lockHash);
+    await npm(['ci','--include=dev','--no-audit','--no-fund'],{env});
   }
+  if(install){await verifyInstalledVersions(appDir,JSON.parse(await readFile(path.join(appDir,'package-lock.json'),'utf8')));await writeFile(dependencyStamp,lockHash);}
   return {appDir,digest,env};
 }
 export async function ready(options){const state=await prepare(options);let built='';try{built=await readFile(path.join(runtime,'built.txt'),'utf8');}catch{}if(built!==state.digest||!existsSync(path.join(appDir,'dist-electron/main.js'))){await npm(['run','build'],{env:state.env});await writeFile(path.join(runtime,'built.txt'),state.digest);}return state;}
