@@ -1,0 +1,11 @@
+[
+  ".env.example", ".gitattributes", ".gitignore", ".nvmrc",
+  ".github/workflows/ci.yml", "package.json", "README.md", "LICENSE",
+  "CONTRIBUTING.md", "SECURITY.md", "docs/RELEASING.md", "release-files.json",
+  "启动.cmd", "安装每周任务.cmd", "server.mjs",
+  "lib/analyze.mjs", "lib/scanner.mjs", "lib/schedule.mjs", "lib/storage.mjs", "lib/trending.mjs", "lib/network.mjs", "lib/network-worker.mjs",
+  "web/index.html", "web/app.js", "web/style.css",
+  "scripts/install-task.ps1", "scripts/remove-task.ps1", "scripts/launch.mjs", "scripts/doctor.mjs",
+  "scripts/privacy-check.mjs", "scripts/release.mjs", "scripts/zip.mjs",
+  "test/core.test.mjs", "test/flow.test.mjs", "test/http.test.mjs", "test/release.test.mjs", "test/network.test.mjs"
+]

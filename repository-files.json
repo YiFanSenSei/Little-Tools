@@ -1,0 +1,5 @@
+[
+  "README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md", "package.json", "tools.json",
+  ".gitignore", ".gitattributes", ".nvmrc", ".github/workflows/github-radar.yml",
+  "docs/STRUCTURE.md", "repository-files.json", "scripts/run-tool.mjs", "scripts/audit-repository.mjs"
+]

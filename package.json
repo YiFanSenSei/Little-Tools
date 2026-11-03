@@ -1,0 +1,16 @@
+{
+  "name": "little-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Independent local utility collection",
+  "scripts": {
+    "start": "node scripts/run-tool.mjs github-radar start",
+    "list": "node scripts/run-tool.mjs",
+    "tool": "node scripts/run-tool.mjs",
+    "test": "node scripts/run-tool.mjs github-radar test",
+    "privacy:check": "node scripts/audit-repository.mjs"
+  },
+  "engines": { "node": ">=22.21.0" }
+}

@@ -1,0 +1,24 @@
+# Runtime and local state, at any tool depth.
+data/
+release/
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+*.zip
+*.tgz
+preview.png
+screenshots/
+*.pem
+*.key
+*.p12
+*.pfx
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.codex/
+.agents/
+.aws/

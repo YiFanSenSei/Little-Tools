@@ -1,0 +1,10 @@
+[
+  {
+    "id": "github-radar",
+    "name": "拾星 · GitHub Radar",
+    "path": "tools/github-radar",
+    "runtime": "node",
+    "defaultPort": 3210,
+    "commands": ["start", "scan", "doctor", "test", "privacy:check", "release"]
+  }
+]
